@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snakonator - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="night-mode-toggle">
+        <button id="night-mode-btn" class="night-mode-btn">🌙</button>
+    </div>
+    
+    <div id="home-container">
+        <h1 class="title">Snakonator</h1>
+        
+        <div class="customization-container">
+            <div class="options-section">
+                <div class="customization-section">
+                    <h2>Choose Snake Color</h2>
+                    <div class="color-options">
+                        <button class="color-btn red" data-color="#FF0000"></button>
+                        <button class="color-btn blue" data-color="#0000FF"></button>
+                        <button class="color-btn green" data-color="#00FF00"></button>
+                    </div>
+                </div>
+                
+                <div class="customization-section">
+                    <h2>Choose Theme</h2>
+                    <div class="theme-options">
+                        <button class="theme-btn jungle" data-theme="jungle">Jungle</button>
+                        <button class="theme-btn desert" data-theme="desert">Desert</button>
+                        <button class="theme-btn moon" data-theme="moon">Moon</button>
+                    </div>
+                </div>
+                
+                <div class="customization-section">
+                    <h2>Choose Speed</h2>
+                    <div class="speed-options">
+                        <button class="speed-btn slow" data-speed="200">Slow</button>
+                        <button class="speed-btn normal selected" data-speed="150">Normal</button>
+                        <button class="speed-btn fast" data-speed="100">Fast</button>
+                    </div>
+                </div>
+                
+                <button id="play-btn" class="pixel-btn">Play</button>
+            </div>
+
+            <div class="preview-section">
+                <h2>Theme Preview</h2>
+                <canvas id="preview-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="home.js"></script>
+</body>
+</html> 

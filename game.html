@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snakonator - Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="night-mode-toggle">
+        <button id="night-mode-btn" class="night-mode-btn">🌙</button>
+    </div>
+    
+    <div id="game-container">
+        <div class="game-controls">
+            <button id="restart-btn" class="pixel-btn">Restart</button>
+            <div id="score">Score: <span id="score-value">0</span></div>
+            <a href="index.html" class="pixel-btn">Exit Game</a>
+        </div>
+        <canvas id="game-canvas"></canvas>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html> 
