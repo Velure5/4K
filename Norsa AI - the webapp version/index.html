@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Norsa AI - Smart Study Notes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+        .file-upload {
+            border: 2px dashed #7dd3fc;
+            transition: all 0.3s ease;
+        }
+        .file-upload:hover {
+            border-color: #0ea5e9;
+            background-color: rgba(14, 165, 233, 0.05);
+        }
+        .note-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .auth-modal {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+
+    <!-- Upgrade Modal -->
+    <div id="upgradeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl p-8 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Upgrade to Pro</h2>
+                <button onclick="closeUpgradeModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="bg-primary-50 border border-primary-200 rounded-lg p-6 mb-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Norsa AI Pro</h3>
+                <p class="text-gray-600 mb-4">Unlock unlimited uploads and advanced features</p>
+                
+                <div class="flex items-end mb-4">
+                    <span class="text-4xl font-bold text-gray-800">$6.99</span>
+                    <span class="text-gray-500 ml-1">/ month</span>
+                </div>
+                
+                <ul class="space-y-2 text-gray-700">
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle text-primary-600 mr-2"></i>
+                        Unlimited document uploads
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle text-primary-600 mr-2"></i>
+                        Flashcard generation
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle text-primary-600 mr-2"></i>
+                        Quiz creation
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle text-primary-600 mr-2"></i>
+                        Notion & PDF exports
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle text-primary-600 mr-2"></i>
+                        Priority support
+                    </li>
+                </ul>
+            </div>
+            
+            <button onclick="upgradeToPro()" class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg hover:bg-primary-700 transition font-medium">
+                Upgrade Now
+            </button>
+            
+            <p class="text-center text-gray-500 text-sm mt-4">
+                Cancel anytime. 7-day free trial available.
+            </p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-brain text-primary-600 text-2xl mr-2"></i>
+                    <h1 class="text-xl font-bold text-gray-800">Norsa AI</h1>
+                </div>
+                
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="text-gray-600 hover:text-primary-600">Features</a>
+                    <a href="#" class="text-gray-600 hover:text-primary-600">Pricing</a>
+                    <a href="#" class="text-gray-600 hover:text-primary-600">Resources</a>
+                </nav>
+                
+                <div id="authButtons" class="flex items-center space-x-4">
+                    <a href="signin.html" class="px-4 py-2 text-primary-600 font-medium hover:bg-primary-50 rounded-lg transition">
+                        Sign In
+                    </a>
+                    <a href="signup.html" class="px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition">
+                        Get Started
+                    </a>
+                </div>
+                
+                <div id="userMenu" class="hidden items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="userEmail" class="font-medium text-gray-700">user@example.com</span>
+                    </div>
+                    <button onclick="logout()" class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Hero Section -->
+            <section id="landing" class="py-16 md:py-24">
+                <div class="container mx-auto px-4">
+                    <div class="max-w-3xl mx-auto text-center">
+                        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">Turn Documents into Smart Study Notes</h1>
+                        <p class="text-xl text-gray-600 mb-8">Norsa AI helps students and professionals save time by instantly summarizing PDFs, slides, and documents into concise study materials.</p>
+                        <div class="flex flex-col sm:flex-row justify-center gap-4">
+                            <a href="signup.html" class="px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition">
+                                Try Free
+                            </a>
+                            <button onclick="scrollToFeatures()" class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition">
+                                Learn More
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-16 max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Student studying" class="w-full h-64 object-cover">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section id="features" class="py-16 bg-white">
+                <div class="container mx-auto px-4">
+                    <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">How Norsa AI Works</h2>
+                    
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="bg-primary-50 p-6 rounded-xl">
+                            <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 mb-4">
+                                <i class="fas fa-upload text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">1. Upload Your Documents</h3>
+                            <p class="text-gray-600">Upload PDFs, PowerPoint slides, Word documents, or text files.</p>
+                        </div>
+                        
+                        <div class="bg-primary-50 p-6 rounded-xl">
+                            <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 mb-4">
+                                <i class="fas fa-robot text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">2. AI Processes Content</h3>
+                            <p class="text-gray-600">Our AI identifies key concepts and relationships in your materials.</p>
+                        </div>
+                        
+                        <div class="bg-primary-50 p-6 rounded-xl">
+                            <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 mb-4">
+                                <i class="fas fa-file-alt text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">3. Get Smart Notes</h3>
+                            <p class="text-gray-600">Receive concise summaries, flashcards, and study guides.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard (Logged In) -->
+            <section id="dashboard" class="py-12 hidden">
+                <div class="container mx-auto px-4">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800">My Study Notes</h2>
+                        
+                        <div id="usageCounter" class="bg-primary-100 text-primary-800 px-4 py-2 rounded-full text-sm font-medium">
+                            <span id="usageCount">0</span>/10 edits today
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <div id="planInfo" class="bg-white border border-gray-200 rounded-lg px-4 py-2">
+                            <span class="text-gray-700">You're on the <span class="font-medium">Free Plan</span> — </span>
+                            <span id="planLimits">10 edits per day with summaries only</span>
+                        </div>
+                        
+                        <button onclick="openUpgradeModal()" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition flex items-center">
+                            <i class="fas fa-crown mr-2"></i>
+                            Upgrade to Pro
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <!-- File Upload -->
+                        <div class="file-upload bg-white rounded-xl p-6 cursor-pointer col-span-1">
+                            <div class="flex flex-col items-center justify-center h-full">
+                                <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 mb-4">
+                                    <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-800 mb-2">Upload Document</h3>
+                                <p class="text-gray-500 text-center mb-4">PDF, PPT, DOCX, or TXT files</p>
+                                <button class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition">
+                                    Select File
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Sample Notes -->
+                        <div class="note-card bg-white rounded-xl p-6 shadow-sm col-span-1">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-lg font-medium text-gray-800">Biology 101 - Chapter 3</h3>
+                                <span class="text-xs bg-primary-100 text-primary-800 px-2 py-1 rounded">Summary</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Summary of cellular respiration processes including glycolysis, Krebs cycle, and electron transport chain...</p>
+                            <div class="flex justify-between items-center text-sm text-gray-500">
+                                <span>2 days ago</span>
+                                <button class="text-primary-600 hover:text-primary-800">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="note-card bg-white rounded-xl p-6 shadow-sm col-span-1">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-lg font-medium text-gray-800">History - World War II</h3>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Flashcards</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">15 flashcards covering key events, dates, and figures from World War II...</p>
+                            <div class="flex justify-between items-center text-sm text-gray-500">
+                                <span>1 week ago</span>
+                                <button class="text-primary-600 hover:text-primary-800">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6 shadow-sm">
+                        <h3 class="text-lg font-medium text-gray-800 mb-4">Recent Activity</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 mr-3 mt-1">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-800">You created a summary from "Chemistry Basics.pdf"</p>
+                                    <p class="text-sm text-gray-500">2 hours ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3 mt-1">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-800">Flashcards generated for "European History.pptx"</p>
+                                    <p class="text-sm text-gray-500">1 day ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-12">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div>
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-brain text-primary-400 text-2xl mr-2"></i>
+                            <h3 class="text-xl font-bold">Norsa AI</h3>
+                        </div>
+                        <p class="text-gray-400">Smart study tools powered by AI to help you learn faster and more effectively.</p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Product</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Features</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Pricing</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Examples</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Blog</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Help Center</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Legal</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Privacy</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Terms</a></li>
+                            <li><a href="#" class="text-gray-400 hover:text-white transition">Security</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-400 mb-4 md:mb-0">© 2023 Norsa AI. All rights reserved.</p>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // User state
+        let currentUser = null;
+        let usageCount = 0;
+        let isProUser = false;
+        
+        // DOM Elements
+        const authModal = document.getElementById('authModal');
+        const upgradeModal = document.getElementById('upgradeModal');
+        const authButtons = document.getElementById('authButtons');
+        const userMenu = document.getElementById('userMenu');
+        const userEmail = document.getElementById('userEmail');
+        const dashboard = document.getElementById('dashboard');
+        const landing = document.getElementById('landing');
+        const features = document.getElementById('features');
+        const usageCounter = document.getElementById('usageCounter');
+        const planInfo = document.getElementById('planInfo');
+        const planLimits = document.getElementById('planLimits');
+        
+        // Check if user is logged in on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedUser = localStorage.getItem('norsaai_user');
+            if (storedUser) {
+                currentUser = JSON.parse(storedUser);
+                updateUIForLoggedInUser();
+            }
+        });
+        
+        // Upgrade Modal Functions
+        function openUpgradeModal() {
+            upgradeModal.classList.remove('hidden');
+        }
+        
+        function closeUpgradeModal() {
+            upgradeModal.classList.add('hidden');
+        }
+        
+        // UI Update Functions
+        function updateUIForLoggedInUser() {
+            authButtons.classList.add('hidden');
+            userMenu.classList.remove('hidden');
+            userEmail.textContent = currentUser.email;
+            
+            dashboard.classList.remove('hidden');
+            landing.classList.add('hidden');
+            features.classList.add('hidden');
+            
+            // Update usage counter
+            usageCount.textContent = currentUser.usageCount;
+            
+            // Update plan info
+            if (currentUser.isPro) {
+                planInfo.innerHTML = '<span class="text-gray-700">You\'re on the <span class="font-medium">Pro Plan</span> — Unlimited edits with all features</span>';
+                usageCounter.classList.add('hidden');
+                isProUser = true;
+            } else {
+                planInfo.innerHTML = '<span class="text-gray-700">You\'re on the <span class="font-medium">Free Plan</span> — 10 edits per day with summaries only</span>';
+                usageCounter.classList.remove('hidden');
+                isProUser = false;
+            }
+        }
+        
+        function updateUIForLoggedOutUser() {
+            authButtons.classList.remove('hidden');
+            userMenu.classList.add('hidden');
+            
+            dashboard.classList.add('hidden');
+            landing.classList.remove('hidden');
+            features.classList.remove('hidden');
+        }
+        
+        // Other Functions
+        function scrollToFeatures() {
+            document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Simulate document processing (would be API calls in real app)
+        function processDocument() {
+            if (!currentUser) {
+                openUpgradeModal();
+                return;
+            }
+            
+            if (!isProUser && currentUser.usageCount >= 10) {
+                alert('You\'ve reached your daily limit of 10 edits. Upgrade to Pro for unlimited edits.');
+                openUpgradeModal();
+                return;
+            }
+            
+            // Increment usage
+            currentUser.usageCount++;
+            localStorage.setItem('norsaai_user', JSON.stringify(currentUser));
+            usageCount.textContent = currentUser.usageCount;
+            
+            // Process document (simulated)
+            alert('Document processing started. You will receive a notification when your notes are ready.');
+        }
+    </script>
+</body>
+</html>
